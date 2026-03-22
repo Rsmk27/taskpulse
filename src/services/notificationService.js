@@ -24,6 +24,13 @@ import {
   combineDatetime,
 } from '../utils/dateUtils';
 
+function getEffectiveMaxRepeats(task, settings) {
+  const rawMax = typeof task.maxRepeats === 'number'
+    ? task.maxRepeats
+    : (settings.repeatReminders.maxRepeats ?? 5);
+  return rawMax === 0 ? Infinity : rawMax;
+}
+
 export const requestPermissions = async () => {
   const { status } = await Notifications.requestPermissionsAsync();
   return status === 'granted';
@@ -58,12 +65,25 @@ export const scheduleMorningBriefing = async (settings, tasks) => {
   } catch {}
 
   const todayTasks = tasks.filter(t => t.date === getTodayStr());
-  const total = todayTasks.length;
-  const deadlines = todayTasks.filter(t => t.type === 'deadline').length;
+
+  const includes = settings.briefingIncludes;
+  const filteredTasks = includes && typeof includes === 'object'
+    ? todayTasks.filter(t => {
+        if (t.type === 'deadline') return includes.deadlines !== false;
+        if (t.type === 'routine')  return includes.routines  !== false;
+        return includes.allTasks !== false;
+      })
+    : todayTasks;
+
+  const total     = filteredTasks.length;
+  const deadlines = filteredTasks.filter(t => t.type === 'deadline').length;
 
   const [hourStr, minStr] = settings.briefingTime.split(':');
-  const hour = parseInt(hourStr, 10);
-  const minute = parseInt(minStr, 10);
+  const hour   = parseInt(hourStr, 10);
+  const minute = parseInt(minStr,  10);
+
+  const triggerTime = dayjs().hour(hour).minute(minute).second(0).millisecond(0);
+  const scheduledAt = (triggerTime.isAfter(dayjs()) ? triggerTime : triggerTime.add(1, 'day')).toISOString();
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {
@@ -79,12 +99,12 @@ export const scheduleMorningBriefing = async (settings, tasks) => {
 
   await AsyncStorage.setItem('BRIEFING_NOTIF_ID', id);
   await appendNotifLog({
-    id:      id,
+    id,
     taskId:  null,
     type:    'briefing',
     title:   '☀️ Good Morning!',
     message: `You have ${total} tasks today, ${deadlines} deadlines.`,
-    firedAt: new Date().toISOString(),
+    firedAt: scheduledAt,
     read:    false,
   });
 };
@@ -169,33 +189,42 @@ export const scheduleTaskReminder = async (task) => {
     trigger: triggerDate,
   });
 
-  const notifIds = [...(task.notifIds || []), id];
-  task.notifIds = notifIds;
+  task.notifIds      = [...(task.notifIds || []), id];
+  task.lastReminderAt = combineDatetime(task.date, task.time).toISOString();
   await saveTask(task);
 };
 
 export const scheduleRepeatReminder = async (task, settings, overrideMinutes = null) => {
-  if ((task.repeatCount || 0) >= (task.maxRepeats || 5)) return;
+  if (!settings.repeatReminders.enabled) return;
+
+  const repeatCount = task.repeatCount ?? 0;
+  const effectiveMax = getEffectiveMaxRepeats(task, settings);
+  if (repeatCount >= effectiveMax) return;
+
   if (settings.quietHours.enabled && isInQuietWindow(settings.quietHours.start, settings.quietHours.end)) return;
 
   const nowStr = dayjs().format('HH:mm');
   if (nowStr >= settings.repeatReminders.hardStopTime) return;
 
-  const minutes = overrideMinutes !== null ? overrideMinutes : settings.repeatReminders.interval;
+  const minutes = overrideMinutes !== null
+    ? overrideMinutes
+    : (task.repeatInterval ?? settings.repeatReminders.interval);
   const triggerDate = minutesFromNow(minutes);
+
+  const maxLabel = effectiveMax === Infinity ? 'Unlimited' : String(effectiveMax);
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {
       title:            task.title,
-      body:             `Still pending. Reminder ${(task.repeatCount || 0) + 1} of ${task.maxRepeats}`,
+      body:             `Still pending. Reminder ${repeatCount + 1} of ${maxLabel}`,
       categoryIdentifier: 'TASK_ACTION',
       data:             { taskId: task.id, type: 'repeat_reminder' },
     },
     trigger: triggerDate,
   });
 
-  const notifIds = [...(task.notifIds || []), id];
-  task.notifIds = notifIds;
+  task.notifIds       = [...(task.notifIds || []), id];
+  task.lastReminderAt = new Date().toISOString();
   await incrementRepeatCount(task.id);
   await saveTask(task);
 };
@@ -251,10 +280,11 @@ export const handleNotificationResponse = async (response) => {
       await updateTaskStatus(taskId, 'skipped');
       await cancelAllTaskNotifications(taskId);
       break;
-    case 'DEFAULT':
+    case Notifications.DEFAULT_ACTION_IDENTIFIER:
     default: {
+      const notifId = response.notification.request.identifier;
       const log = await getNotifLog();
-      const entry = log.find(e => e.taskId === taskId);
+      const entry = log.find(e => e.id === notifId);
       if (entry) {
         await markNotifRead(entry.id);
       }
@@ -271,11 +301,15 @@ TaskManager.defineTask(BG_TASK, async () => {
     const settings = await getSettings();
     const now      = dayjs();
 
+    if (!settings.repeatReminders.enabled) {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
+
     const pending = tasks.filter(t =>
       t.status === 'pending' &&
-      (t.repeatCount || 0) < t.maxRepeats &&
-      t.lastActionTime &&
-      now.diff(dayjs(t.lastActionTime), 'minute') >= settings.repeatReminders.interval
+      (t.repeatCount ?? 0) < getEffectiveMaxRepeats(t, settings) &&
+      t.lastReminderAt &&
+      now.diff(dayjs(t.lastReminderAt), 'minute') >= settings.repeatReminders.interval
     );
 
     for (const task of pending) {

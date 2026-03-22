@@ -97,8 +97,12 @@ export const getTaskHistory = async (days = 7) => {
   const tasks = await getTasks();
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
+  const year = cutoff.getFullYear();
+  const month = String(cutoff.getMonth() + 1).padStart(2, '0');
+  const day = String(cutoff.getDate()).padStart(2, '0');
+  const cutoffStr = `${year}-${month}-${day}`;
   return tasks
-    .filter(t => new Date(t.date) >= cutoff)
+    .filter(t => t.date >= cutoffStr)
     .sort((a, b) => b.date.localeCompare(a.date));
 };
 

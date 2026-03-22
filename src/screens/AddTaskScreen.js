@@ -66,6 +66,7 @@ export default function AddTaskScreen({ navigation }) {
       repeatCount:    0,
       status:         'pending',
       lastActionTime: null,
+      lastReminderAt: null,
       notifIds:       [],
       createdAt:      new Date().toISOString(),
     };

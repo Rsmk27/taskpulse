@@ -5,7 +5,7 @@ export const getTodayStr = () => dayjs().format('YYYY-MM-DD');
 export const getYesterdayStr = () => dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
 export const combineDatetime = (dateStr, timeStr) =>
-  dayjs(`${dateStr} ${timeStr}`, 'YYYY-MM-DD HH:mm');
+  dayjs(`${dateStr}T${timeStr}`);
 
 export const isInFuture = (dateStr, timeStr) =>
   combineDatetime(dateStr, timeStr).isAfter(dayjs());
@@ -18,7 +18,7 @@ export const minutesUntil = (dateStr, timeStr) =>
   combineDatetime(dateStr, timeStr).diff(dayjs(), 'minute');
 
 export const formatDisplayTime = (timeStr) =>
-  dayjs(`2000-01-01 ${timeStr}`).format('h:mm A');
+  dayjs(`2000-01-01T${timeStr}`).format('h:mm A');
 
 export const formatDisplayDate = (dateStr) =>
   dayjs(dateStr).format('ddd, MMM D');
@@ -34,9 +34,16 @@ export const minutesFromNow = (n) => dayjs().add(n, 'minute').toDate();
 
 export const isInQuietWindow = (startStr, endStr) => {
   const now = dayjs();
-  const start = dayjs(`${getTodayStr()} ${startStr}`, 'YYYY-MM-DD HH:mm');
-  let end = dayjs(`${getTodayStr()} ${endStr}`, 'YYYY-MM-DD HH:mm');
-  if (end.isBefore(start)) end = end.add(1, 'day');
+  let start = dayjs(`${getTodayStr()}T${startStr}`);
+  let end = dayjs(`${getTodayStr()}T${endStr}`);
+
+  if (end.isBefore(start)) {
+    if (now.isBefore(end)) {
+      start = start.subtract(1, 'day');
+    } else {
+      end = end.add(1, 'day');
+    }
+  }
   return now.isAfter(start) && now.isBefore(end);
 };
 
