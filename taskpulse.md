@@ -1,25 +1,4 @@
-# TaskPulse — Single Shot Master Prompt
-# Tool: GitHub Copilot Agent Mode (VS Code)
-# Send this entire file as ONE message after project init
 
----
-
-## BEFORE SENDING THIS PROMPT — Run in VS Code Terminal first:
-
-```bash
-npx create-expo-app taskpulse --template blank
-cd taskpulse
-npx expo install expo-notifications expo-task-manager expo-background-fetch @react-native-async-storage/async-storage dayjs @expo/vector-icons expo-crypto react-native-svg
-npm install @react-navigation/native @react-navigation/bottom-tabs @react-navigation/stack react-native-screens react-native-safe-area-context
-```
-
-Open the `taskpulse` folder in VS Code.
-Switch Copilot Chat to Agent mode.
-Paste everything below this line as one message.
-
----
-
-## YOUR TASK
 
 You are a senior React Native + Expo developer. Build a complete, fully working Android app called **TaskPulse** from scratch inside this project folder.
 
@@ -949,14 +928,3 @@ After writing all files, check each item and fix any issues before declaring don
 - [ ] Zero network calls in any file
 
 ---
-
-## TEST PLAN — Run these after `npx expo start` on a physical Android device
-
-1. Add a one-time task 2 minutes from now → verify notification fires with Done/Snooze/Skip buttons
-2. Tap Done → verify task marked done, all notifications cancelled, Home shows it crossed out
-3. Add a deadline task 1.5 hours from now → verify 1-hour warning fires, then 30-min warning fires
-4. Add a routine task 1 minute from now → tap Done → verify it reappears tomorrow
-5. Set briefing time to 2 min from now in Settings → verify briefing notification fires
-6. Turn on airplane mode → verify all the above still works with zero internet
-7. Check Timeline screen shows correct cascade for deadline task
-8. Check History screen shows today's completion stats correctly
