@@ -39,3 +39,22 @@ export const isInQuietWindow = (startStr, endStr) => {
   if (end.isBefore(start)) end = end.add(1, 'day');
   return now.isAfter(start) && now.isBefore(end);
 };
+
+export function deepMerge(target, source) {
+  const output = { ...target };
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] !== null &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key]) &&
+      target[key] !== null &&
+      typeof target[key] === 'object' &&
+      !Array.isArray(target[key])
+    ) {
+      output[key] = deepMerge(target[key], source[key]);
+    } else {
+      output[key] = source[key];
+    }
+  }
+  return output;
+}

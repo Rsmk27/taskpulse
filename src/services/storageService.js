@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deepMerge } from '../utils/dateUtils';
 
 const TASKS_KEY     = '@tp_tasks';
 const SETTINGS_KEY  = '@tp_settings';
@@ -26,25 +27,6 @@ const DEFAULT_SETTINGS = {
     end:     '07:00',
   },
 };
-
-function deepMerge(target, source) {
-  const output = { ...target };
-  for (const key of Object.keys(source)) {
-    if (
-      source[key] !== null &&
-      typeof source[key] === 'object' &&
-      !Array.isArray(source[key]) &&
-      target[key] !== null &&
-      typeof target[key] === 'object' &&
-      !Array.isArray(target[key])
-    ) {
-      output[key] = deepMerge(target[key], source[key]);
-    } else {
-      output[key] = source[key];
-    }
-  }
-  return output;
-}
 
 export const getTasks = async () => {
   try {

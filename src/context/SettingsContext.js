@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getSettings, saveSettings } from '../services/storageService';
+import { getSettings, saveSettings, getTasks } from '../services/storageService';
 import { scheduleMorningBriefing } from '../services/notificationService';
-import { getTasks } from '../services/storageService';
+import { deepMerge } from '../utils/dateUtils';
 
 const SettingsContext = createContext(null);
 
@@ -31,22 +31,3 @@ export const SettingsProvider = ({ children }) => {
 };
 
 export const useSettings = () => useContext(SettingsContext);
-
-function deepMerge(target, source) {
-  const output = { ...target };
-  for (const key of Object.keys(source)) {
-    if (
-      source[key] !== null &&
-      typeof source[key] === 'object' &&
-      !Array.isArray(source[key]) &&
-      target[key] !== null &&
-      typeof target[key] === 'object' &&
-      !Array.isArray(target[key])
-    ) {
-      output[key] = deepMerge(target[key], source[key]);
-    } else {
-      output[key] = source[key];
-    }
-  }
-  return output;
-}

@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 import dayjs from 'dayjs';
 
 import {
@@ -12,6 +13,7 @@ import {
   incrementRepeatCount,
   appendNotifLog,
   getNotifLog,
+  markNotifRead,
 } from './storageService';
 import {
   isInFuture,
@@ -227,17 +229,15 @@ export const handleNotificationResponse = async (response) => {
       await cancelAllTaskNotifications(taskId);
       if (task && task.type === 'routine') {
         const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
-        const { randomUUID } = await import('expo-crypto');
         const newTask = {
           ...task,
-          id:          randomUUID(),
+          id:          Crypto.randomUUID(),
           date:        tomorrow,
           status:      'pending',
           repeatCount: 0,
           notifIds:    [],
         };
-        const { saveTask: st } = await import('./storageService');
-        await st(newTask);
+        await saveTask(newTask);
         await scheduleTaskReminder(newTask);
       }
       break;
@@ -256,7 +256,6 @@ export const handleNotificationResponse = async (response) => {
       const log = await getNotifLog();
       const entry = log.find(e => e.taskId === taskId);
       if (entry) {
-        const { markNotifRead } = await import('./storageService');
         await markNotifRead(entry.id);
       }
       break;
