@@ -1,0 +1,67 @@
+import dayjs from 'dayjs';
+
+export const getTodayStr = () => dayjs().format('YYYY-MM-DD');
+
+export const getYesterdayStr = () => dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+
+export const combineDatetime = (dateStr, timeStr) =>
+  dayjs(`${dateStr}T${timeStr}`);
+
+export const isInFuture = (dateStr, timeStr) =>
+  combineDatetime(dateStr, timeStr).isAfter(dayjs());
+
+export const isToday = (dateStr) => dateStr === getTodayStr();
+
+export const isYesterday = (dateStr) => dateStr === getYesterdayStr();
+
+export const minutesUntil = (dateStr, timeStr) =>
+  combineDatetime(dateStr, timeStr).diff(dayjs(), 'minute');
+
+export const formatDisplayTime = (timeStr) =>
+  dayjs(`2000-01-01T${timeStr}`).format('h:mm A');
+
+export const formatDisplayDate = (dateStr) =>
+  dayjs(dateStr).format('ddd, MMM D');
+
+export const getGreeting = () => {
+  const h = dayjs().hour();
+  if (h < 12) return 'Good Morning';
+  if (h < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
+
+export const minutesFromNow = (n) => dayjs().add(n, 'minute').toDate();
+
+export const isInQuietWindow = (startStr, endStr) => {
+  const now = dayjs();
+  let start = dayjs(`${getTodayStr()}T${startStr}`);
+  let end = dayjs(`${getTodayStr()}T${endStr}`);
+
+  if (end.isBefore(start)) {
+    if (now.isBefore(end)) {
+      start = start.subtract(1, 'day');
+    } else {
+      end = end.add(1, 'day');
+    }
+  }
+  return now.isAfter(start) && now.isBefore(end);
+};
+
+export function deepMerge(target, source) {
+  const output = { ...target };
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] !== null &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key]) &&
+      target[key] !== null &&
+      typeof target[key] === 'object' &&
+      !Array.isArray(target[key])
+    ) {
+      output[key] = deepMerge(target[key], source[key]);
+    } else {
+      output[key] = source[key];
+    }
+  }
+  return output;
+}
