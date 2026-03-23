@@ -24,6 +24,17 @@ import {
   combineDatetime,
 } from '../utils/dateUtils';
 
+const buildDateTrigger = (date) => ({
+  type: 'date',
+  date,
+});
+
+const buildDailyTrigger = (hour, minute) => ({
+  type: 'daily',
+  hour,
+  minute,
+});
+
 function getEffectiveMaxRepeats(task, settings) {
   const rawMax = typeof task.maxRepeats === 'number'
     ? task.maxRepeats
@@ -90,11 +101,7 @@ export const scheduleMorningBriefing = async (settings, tasks) => {
       title: '☀️ Good Morning!',
       body:  `You have ${total} tasks today, ${deadlines} deadlines.`,
     },
-    trigger: {
-      hour,
-      minute,
-      repeats: true,
-    },
+    trigger: buildDailyTrigger(hour, minute),
   });
 
   await AsyncStorage.setItem('BRIEFING_NOTIF_ID', id);
@@ -125,7 +132,7 @@ export const scheduleDeadlineWarnings = async (task, settings) => {
           body:  `"${task.title}" is due tomorrow at ${formatDisplayTime(task.time)}`,
           data:  { taskId: task.id, type: 'day_before' },
         },
-        trigger: triggerDate,
+        trigger: buildDateTrigger(triggerDate),
       });
       notifIds.push(id);
       await appendNotifLog({ id, taskId: task.id, type: 'day_before', title: '📅 Deadline Tomorrow', message: `"${task.title}" is due tomorrow at ${formatDisplayTime(task.time)}`, firedAt: triggerDate.toISOString(), read: false });
@@ -141,7 +148,7 @@ export const scheduleDeadlineWarnings = async (task, settings) => {
           body:  `"${task.title}" is due at ${formatDisplayTime(task.time)}`,
           data:  { taskId: task.id, type: '1hr_warning' },
         },
-        trigger: triggerDate,
+        trigger: buildDateTrigger(triggerDate),
       });
       notifIds.push(id);
       await appendNotifLog({ id, taskId: task.id, type: '1hr_warning', title: '⏳ Due in 1 Hour', message: `"${task.title}" is due at ${formatDisplayTime(task.time)}`, firedAt: triggerDate.toISOString(), read: false });
@@ -157,7 +164,7 @@ export const scheduleDeadlineWarnings = async (task, settings) => {
           body:  `Act now — "${task.title}" is due soon`,
           data:  { taskId: task.id, type: '30min_warning' },
         },
-        trigger: triggerDate,
+        trigger: buildDateTrigger(triggerDate),
       });
       notifIds.push(id);
       await appendNotifLog({ id, taskId: task.id, type: '30min_warning', title: '⚡ Due in 30 Minutes!', message: `Act now — "${task.title}" is due soon`, firedAt: triggerDate.toISOString(), read: false });
@@ -186,7 +193,7 @@ export const scheduleTaskReminder = async (task) => {
       categoryIdentifier: 'TASK_ACTION',
       data:             { taskId: task.id, type: 'task_reminder' },
     },
-    trigger: triggerDate,
+    trigger: buildDateTrigger(triggerDate),
   });
 
   task.notifIds      = [...(task.notifIds || []), id];
@@ -220,7 +227,7 @@ export const scheduleRepeatReminder = async (task, settings, overrideMinutes = n
       categoryIdentifier: 'TASK_ACTION',
       data:             { taskId: task.id, type: 'repeat_reminder' },
     },
-    trigger: triggerDate,
+    trigger: buildDateTrigger(triggerDate),
   });
 
   task.notifIds       = [...(task.notifIds || []), id];

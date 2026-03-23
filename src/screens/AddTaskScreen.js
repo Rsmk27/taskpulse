@@ -11,6 +11,8 @@ import { saveTask }                           from '../services/storageService';
 import { scheduleTaskReminder, scheduleDeadlineWarnings } from '../services/notificationService';
 import { useSettings }                        from '../context/SettingsContext';
 import { getTodayStr, isInFuture, formatDisplayDate, formatDisplayTime } from '../utils/dateUtils';
+import BrandLogo from '../components/BrandLogo';
+import BrandFooter from '../components/BrandFooter';
 import { colors, radius } from '../constants/theme';
 
 const INTERVALS    = [5, 10, 15, 30];
@@ -101,10 +103,13 @@ export default function AddTaskScreen({ navigation }) {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-              <Text style={styles.backIcon}>‹</Text>
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>New Task</Text>
+            <View style={styles.headerTop}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+                <Text style={styles.backIcon}>‹</Text>
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>New Task</Text>
+            </View>
+            <BrandLogo compact />
           </View>
 
           {/* Title */}
@@ -217,6 +222,8 @@ export default function AddTaskScreen({ navigation }) {
             <Text style={styles.toastText}>✓ Task saved!</Text>
           </Animated.View>
 
+          <BrandFooter />
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -239,9 +246,12 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
   header: {
+    marginBottom:  24,
+    gap:           12,
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems:    'center',
-    marginBottom:  24,
     gap:           14,
   },
   backBtn: {

@@ -20,6 +20,8 @@ import TaskCard     from '../components/TaskCard';
 import ProgressRing from '../components/ProgressRing';
 import NotifBanner  from '../components/NotifBanner';
 import SectionLabel from '../components/SectionLabel';
+import BrandLogo    from '../components/BrandLogo';
+import BrandFooter  from '../components/BrandFooter';
 import { colors, radius } from '../constants/theme';
 
 function sortTasks(tasks) {
@@ -103,7 +105,8 @@ export default function HomeScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
-        {/* Greeting */}
+        {/* Branding + Greeting */}
+        <BrandLogo />
         <Text style={styles.greetingSub}>{getGreeting()}, RSMK</Text>
         <View style={styles.dateRow}>
           <Text style={styles.dateDay}>{sortedDate[0]}, </Text>
@@ -172,6 +175,8 @@ export default function HomeScreen({ navigation }) {
             ))}
           </>
         )}
+
+        <BrandFooter />
 
       </ScrollView>
 

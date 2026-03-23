@@ -8,6 +8,8 @@ import dayjs from 'dayjs';
 import { getTaskHistory, getDaySummary } from '../services/storageService';
 import { getTodayStr, formatDisplayDate, isToday, isYesterday, formatDisplayTime } from '../utils/dateUtils';
 import SectionLabel from '../components/SectionLabel';
+import BrandLogo from '../components/BrandLogo';
+import BrandFooter from '../components/BrandFooter';
 import { colors, radius } from '../constants/theme';
 
 const STATUS_COLOR = {
@@ -62,6 +64,8 @@ export default function HistoryScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
+        <BrandLogo compact />
+
         {/* Summary card */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryEmoji}>{emoji}</Text>
@@ -114,6 +118,8 @@ export default function HistoryScreen() {
             </View>
           ))
         )}
+
+        <BrandFooter />
 
       </ScrollView>
     </SafeAreaView>

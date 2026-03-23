@@ -24,8 +24,10 @@
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM",
-        "android.permission.POST_NOTIFICATIONS"
-      ]
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.WAKE_LOCK"
+      ],
+      "package": "com.rsmk27.taskpulse"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,7 +42,9 @@
         }
       ],
       "expo-background-fetch",
-      "expo-task-manager"
+      "expo-task-manager",
+      "@react-native-community/datetimepicker",
+      "expo-font"
     ]
   }
 }

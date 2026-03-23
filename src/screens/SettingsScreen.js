@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 
 import { useSettings }        from '../context/SettingsContext';
 import { formatDisplayTime }  from '../utils/dateUtils';
+import BrandLogo              from '../components/BrandLogo';
+import BrandFooter            from '../components/BrandFooter';
 import { colors, radius }     from '../constants/theme';
 
 export default function SettingsScreen() {
@@ -60,6 +62,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <BrandLogo compact />
         <Text style={styles.pageTitle}>Notification Settings</Text>
 
         {/* MORNING BRIEFING */}
@@ -245,6 +248,8 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        <BrandFooter />
 
       </ScrollView>
 

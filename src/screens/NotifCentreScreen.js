@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 
 import { getNotifLog, markNotifRead, clearNotifLog } from '../services/storageService';
 import { isToday, isYesterday, formatDisplayTime }   from '../utils/dateUtils';
+import BrandLogo from '../components/BrandLogo';
+import BrandFooter from '../components/BrandFooter';
 import { colors, radius } from '../constants/theme';
 
 const TYPE_CONFIG = {
@@ -78,10 +80,13 @@ export default function NotifCentreScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
-        <TouchableOpacity onPress={handleClear}>
-          <Text style={styles.clearText}>Clear all</Text>
-        </TouchableOpacity>
+        <BrandLogo compact />
+        <View style={styles.headerActions}>
+          <Text style={styles.headerTitle}>Notifications</Text>
+          <TouchableOpacity onPress={handleClear}>
+            <Text style={styles.clearText}>Clear all</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -95,6 +100,7 @@ export default function NotifCentreScreen() {
         }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        ListFooterComponent={<BrandFooter />}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>No notifications yet</Text>
@@ -116,6 +122,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding:        18,
     paddingBottom:  10,
+  },
+  headerActions: {
+    alignItems: 'flex-end',
+    gap: 3,
   },
   headerTitle: {
     fontSize:   20,

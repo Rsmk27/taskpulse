@@ -10,6 +10,8 @@ import { useSettings }      from '../context/SettingsContext';
 import {
   getTodayStr, getYesterdayStr, formatDisplayTime, formatDisplayDate, combineDatetime,
 } from '../utils/dateUtils';
+import BrandLogo from '../components/BrandLogo';
+import BrandFooter from '../components/BrandFooter';
 import { colors, radius } from '../constants/theme';
 
 const TYPE_COLOR = {
@@ -88,8 +90,11 @@ export default function TimelineScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notification Timeline</Text>
-        <Text style={styles.headerDate}>{formatDisplayDate(getTodayStr())}</Text>
+        <BrandLogo compact />
+        <View style={styles.headerRight}>
+          <Text style={styles.headerTitle}>Notification Timeline</Text>
+          <Text style={styles.headerDate}>{formatDisplayDate(getTodayStr())}</Text>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -156,6 +161,8 @@ export default function TimelineScreen() {
             <Text style={styles.emptySubText}>Add tasks to see your notification schedule</Text>
           </View>
         )}
+
+        <BrandFooter />
       </ScrollView>
     </SafeAreaView>
   );
@@ -172,6 +179,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding:        18,
     paddingBottom:  12,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
   },
   headerTitle: {
     fontSize:   20,
